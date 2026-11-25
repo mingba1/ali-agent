@@ -1,0 +1,66 @@
+server:
+  address: ":8001"
+  openapiPath: "/api.json"
+  swaggerPath: "/swagger"
+
+logger:
+  level: "info"
+  stdout: true
+
+database:
+  default:
+    link: "mysql:root:root@tcp(127.0.0.1:3306)/ali_agent?charset=utf8mb4&parseTime=True&loc=Local"
+    debug: false
+
+llm:
+  # 留空启用内置 Mock 模式，无需任何外部依赖即可跑通 Agent Loop
+  apiKey: ""
+  baseUrl: "https://api.openai.com/v1"
+  model: "gpt-4o-mini"
+  temperature: 0.3
+  timeoutSeconds: 60
+
+embedding:
+  # 留空使用本地 hashed n-gram 向量；配置后走 OpenAI 兼容 /embeddings
+  apiKey: ""
+  baseUrl: "https://api.openai.com/v1"
+  model: "text-embedding-3-small"
+  dim: 256
+
+agent:
+  # Orchestrator 最多循环轮次（思考→行动→观察）
+  maxRounds: 4
+  # 对话记忆条数
+  memoryLimit: 10
+
+retrieval:
+  # 向量检索 top-k
+  vectorTopK: 10
+  # 文本检索 top-k
+  textTopK: 10
+  # 文件系统检索返回条数
+  fsMaxResults: 20
+  # OLTP/OLAP 查询返回最大行数
+  dbMaxRows: 30
+  # 重排后保留的 top-k
+  rerankTopK: 5
+
+# 各检索后端配置
+retrieval.vector:
+  # 本地余弦相似度阈值
+  minScore: 0.08
+retrieval.text:
+  # 关键词权重：标题、标签、正文
+  titleWeight: 3
+  tagWeight: 2
+  contentWeight: 1
+retrieval.fs:
+  # 文件系统检索根目录（branch state 指向的工作区）
+  root: "./data/workspace"
+  # 允许的扩展名
+  includeExt: ["go", "md", "txt", "yaml", "yml", "json", "sql"]
+  # 最大扫描文件数
+  maxFiles: 2000
+retrieval.db:
+  # OLTP/OLAP 查询允许的表（白名单，留空表示不限制）
+  allowTables: ["doc", "doc_chunk", "task", "agent", "chat_session", "chat_message"]
